@@ -78,10 +78,6 @@ def feature_label(feature: str) -> str:
     return DISPLAY_NAMES.get(feature, feature)
 
 
-def model_feature_label(feature: str) -> str:
-    return f"{DISPLAY_NAMES.get(feature, feature)} ({feature})"
-
-
 def prepare_input(input_df: pd.DataFrame) -> pd.DataFrame:
     input_df = input_df[features].copy()
     for col in categorical_features:
@@ -115,12 +111,11 @@ def get_local_shap(input_df: pd.DataFrame) -> pd.DataFrame:
     shap_values = model.get_feature_importance(pool, type="ShapValues")
     contribution = shap_values[0, :-1]
     df = pd.DataFrame({
-        "Feature": features,
-        "Display name": [DISPLAY_NAMES.get(f, f) for f in features],
+        "Predictor": [DISPLAY_NAMES.get(f, f) for f in features],
         "Value": [model_input.iloc[0][f] for f in features],
         "SHAP contribution": contribution,
     })
-    df["Direction"] = df["SHAP contribution"].apply(lambda x: "Increases predicted risk" if x > 0 else "Decreases predicted risk")
+    df["Predicted risk"] = df["SHAP contribution"].apply(lambda x: "Increases" if x > 0 else "Decreases")
     df["Absolute contribution"] = df["SHAP contribution"].abs()
     return df.sort_values("Absolute contribution", ascending=False)
 
@@ -155,41 +150,43 @@ with st.sidebar:
 tab_single, tab_batch, tab_model = st.tabs(["Single-patient prediction", "Batch CSV prediction", "Predictor list"])
 
 with tab_single:
-    st.subheader("Single-patient prediction")
     st.write("Enter the 14 simplified-model predictors below.")
 
     values = {}
-    col1, col2 = st.columns(2)
 
-    with col1:
-        st.markdown("#### Binary predictors")
-        for feature in categorical_features:
+    st.markdown("#### Binary predictors")
+    binary_cols = st.columns(2)
+    for idx, feature in enumerate(categorical_features):
+        with binary_cols[idx % 2]:
             values[feature] = st.selectbox(
-                model_feature_label(feature),
+                feature_label(feature),
                 options=[0, 1],
                 format_func=lambda x: "Yes / 1" if x == 1 else "No / 0",
                 index=int(DEFAULTS[feature]),
             )
 
+    st.markdown("#### Continuous predictors")
     numeric_features = [f for f in features if f not in categorical_features]
-    with col2:
-        st.markdown("#### Continuous predictors")
-        for feature in numeric_features:
+    for row_start in range(0, len(numeric_features), 3):
+        cols = st.columns(3)
+        for col, feature in zip(cols, numeric_features[row_start:row_start + 3]):
             min_value, max_value, step, unit = INPUT_CONFIG.get(feature, (0.0, 9999.0, 0.1, ""))
-            values[feature] = st.number_input(
-                f"{model_feature_label(feature)} [{unit}]",
-                min_value=min_value,
-                max_value=max_value,
-                value=float(DEFAULTS.get(feature, min_value)),
-                step=step,
-            )
+            label = feature_label(feature) if not unit else f"{feature_label(feature)} [{unit}]"
+            with col:
+                values[feature] = st.number_input(
+                    label,
+                    min_value=min_value,
+                    max_value=max_value,
+                    value=float(DEFAULTS.get(feature, min_value)),
+                    step=step,
+                )
 
     st.info(
         """
 **Variable definitions**  
 • **Mechanical ventilation**: use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.  
-• **Continuous variables**: unless otherwise specified, continuous predictors represent mean values measured during the 24 hours preceding sepsis diagnosis; **urine output** represents the total urine output accumulated during this 24-hour window.  
-• **Chronic neurological disease**: history of chronic neurological disorders associated with persistent neurological dysfunction, including dementia or other neurodegenerative diseases, Parkinsonian disorders, epilepsy, chronic spinal cord diseases, demyelinating diseases, chronic paralysis, and related long-term neurological conditions.
+• **Continuous variables**: all continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis; **urine output** represents the total urine output accumulated during this 24-hour window.  
+• **Chronic neurological disease**: identified from hospital-level ICD diagnosis records linked to the sepsis ICU stay, including pre-existing comorbidities and diagnoses recorded during the hospital admission. The definition covers chronic neurological disorders associated with persistent neurological dysfunction, such as dementia or other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions; migraine and related headache disorders were excluded.
         """
     )
 
@@ -218,7 +215,7 @@ Risk category: **{group}**. {group_note} These categories are intended only to m
             top_df = shap_df.head(10).copy()
             fig, ax = plt.subplots(figsize=(8, 4.8))
             plot_df = top_df.sort_values("SHAP contribution")
-            ax.barh(plot_df["Display name"], plot_df["SHAP contribution"])
+            ax.barh(plot_df["Predictor"], plot_df["SHAP contribution"])
             ax.axvline(0, linewidth=1)
             ax.set_xlabel("SHAP contribution to model output")
             ax.set_ylabel("")
@@ -226,7 +223,7 @@ Risk category: **{group}**. {group_note} These categories are intended only to m
             st.pyplot(fig, use_container_width=True)
             st.caption("Positive SHAP values increase the model-predicted risk; negative SHAP values decrease the model-predicted risk.")
             st.dataframe(
-                shap_df[["Display name", "Feature", "Value", "SHAP contribution", "Direction"]],
+                shap_df[["Predictor", "Value", "SHAP contribution", "Predicted risk"]],
                 use_container_width=True,
             )
         except Exception as exc:

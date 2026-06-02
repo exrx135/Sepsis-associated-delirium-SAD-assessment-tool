@@ -32,8 +32,8 @@ The app uses a simplified CatBoost model with 14 predictors:
 ## Variable definitions
 
 - **Mechanical ventilation**: use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.
-- **Continuous variables**: unless otherwise specified, continuous predictors represent mean values measured during the 24 hours preceding sepsis diagnosis; urine output represents the total urine output accumulated during this 24-hour window.
-- **Chronic neurological disease**: history of chronic neurological disorders associated with persistent neurological dysfunction, including dementia or other neurodegenerative diseases, Parkinsonian disorders, epilepsy, chronic spinal cord diseases, demyelinating diseases, chronic paralysis, and related long-term neurological conditions.
+- **Continuous variables**: all continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis; urine output represents the total urine output accumulated during this 24-hour window.
+- **Chronic neurological disease**: identified from hospital-level ICD diagnosis records linked to the sepsis ICU stay, including pre-existing comorbidities and diagnoses recorded during the hospital admission. The definition covers chronic neurological disorders associated with persistent neurological dysfunction, such as dementia or other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions; migraine and related headache disorders were excluded.
 
 ## Local deployment
 
@@ -54,7 +54,7 @@ streamlit run app.py
 ### Option 1: Upload through the GitHub web page
 
 1. Create a new GitHub repository.
-2. Unzip `SAD_7day_Streamlit_app_updated.zip` on your computer.
+2. Unzip `SAD_7day_Streamlit_app_v3.zip` on your computer.
 3. Open the new GitHub repository page.
 4. Click **Add file** → **Upload files**.
 5. Drag all unzipped files into the upload area, including:
