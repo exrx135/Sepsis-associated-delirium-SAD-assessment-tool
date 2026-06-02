@@ -47,3 +47,10 @@ After each GitHub commit, Streamlit Cloud usually redeploys the app automaticall
 ## Version note
 
 This version uses compact horizontal input rows to reduce page height while preserving the prediction logic and SHAP explanation workflow.
+
+
+## v11 update
+
+- Variable definitions are displayed in a compact blue information box.
+- The risk category is color-coded: low risk in green, intermediate risk in yellow, and high risk in red.
+- Prediction logic and model files are unchanged.

@@ -105,31 +105,75 @@ section[data-testid="stSidebar"] div {
     font-size: 15px !important;
 }
 
-/* Custom variable-definition box */
-.variable-box {
-    background-color: rgba(49, 51, 63, 0.06);
-    border-left: 5px solid rgba(49, 51, 63, 0.35);
+/* Custom variable-definition information box */
+.definition-card {
+    background-color: #e8f2ff;
+    border-left: 5px solid #2b6cb0;
     border-radius: 8px;
-    padding: 0.75rem 1rem;
-    margin-top: 0.8rem;
-    margin-bottom: 0.8rem;
-}
-.variable-box .box-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 0.45rem;
-}
-.variable-box .var-subtitle {
-    font-size: 20px;
-    font-weight: 700;
-    margin-top: 0.45rem;
-    margin-bottom: 0.2rem;
-}
-.variable-box p {
-    font-size: 16px;
-    line-height: 1.42;
+    padding: 0.65rem 1rem 0.7rem 1rem;
     margin-top: 0.15rem;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.55rem;
+}
+.definition-card .definition-title {
+    color: #174ea6;
+    font-size: 17px;
+    font-weight: 750;
+    margin: 0 0 0.35rem 0;
+    line-height: 1.2;
+}
+.definition-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+}
+.definition-card .definition-subtitle {
+    color: #0b4f9c;
+    font-size: 15.5px;
+    font-weight: 750;
+    margin: 0.2rem 0 0.12rem 0;
+    line-height: 1.2;
+}
+.definition-card p {
+    color: #064f9e;
+    font-size: 15px;
+    line-height: 1.36;
+    margin: 0 0 0.28rem 0;
+}
+@media (max-width: 900px) {
+    .definition-grid {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+    }
+}
+
+/* Colored risk display */
+.risk-card {
+    border-radius: 10px;
+    padding: 0.55rem 0.9rem;
+    text-align: center;
+    font-weight: 800;
+    font-size: 24px;
+    line-height: 1.25;
+    border: 1px solid rgba(0,0,0,0.08);
+    margin-top: 0.1rem;
+}
+.risk-low {
+    background-color: #e6f4ea;
+    color: #137333;
+}
+.risk-intermediate {
+    background-color: #fff4d6;
+    color: #b06000;
+}
+.risk-high {
+    background-color: #fde7e9;
+    color: #c5221f;
+}
+.risk-card-label {
+    font-size: 15px;
+    font-weight: 650;
+    margin-bottom: 0.15rem;
+    opacity: 0.92;
 }
 
 /* Compact horizontal input rows */
@@ -289,6 +333,16 @@ def risk_group(probability: float):
     return "High", "Estimated risk ≥30%."
 
 
+def risk_css_class(group: str) -> str:
+    """Return CSS class for the visual risk category badge."""
+    group_lower = group.lower()
+    if group_lower == "low":
+        return "risk-low"
+    if group_lower == "intermediate":
+        return "risk-intermediate"
+    return "risk-high"
+
+
 def get_local_shap(input_df: pd.DataFrame) -> pd.DataFrame:
     model_input = prepare_input(input_df)
     cat_idx = [features.index(c) for c in categorical_features]
@@ -353,28 +407,26 @@ with tab_single:
             with col:
                 values[feature] = compact_number_input(feature, key=f"num_{feature}")
 
-    with st.container(border=True):
-        st.markdown("#### Variable definitions")
-        def_col1, def_col2 = st.columns(2, gap="large")
-
-        with def_col1:
-            st.markdown(
-                """
-**Mechanical ventilation**  
-Use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.
-
-**Continuous variables**  
-All continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis. Urine output represents the total urine output accumulated during this 24-hour window.
-                """
-            )
-
-        with def_col2:
-            st.markdown(
-                """
-**Chronic neurological disease**  
-Presence of chronic neurological disorders associated with persistent neurological dysfunction, including dementia and other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions.
-                """
-            )
+    st.markdown(
+        """
+<div class="definition-card">
+  <div class="definition-title">Variable definitions</div>
+  <div class="definition-grid">
+    <div>
+      <div class="definition-subtitle">Mechanical ventilation</div>
+      <p>Use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.</p>
+      <div class="definition-subtitle">Continuous variables</div>
+      <p>All continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis. Urine output represents the total urine output accumulated during this 24-hour window.</p>
+    </div>
+    <div>
+      <div class="definition-subtitle">Chronic neurological disease</div>
+      <p>Presence of chronic neurological disorders associated with persistent neurological dysfunction, including dementia and other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions.</p>
+    </div>
+  </div>
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     input_df = pd.DataFrame([{feature: values[feature] for feature in features}])
     probability = float(make_prediction(input_df)["predicted_probability"].iloc[0])
@@ -384,7 +436,16 @@ Presence of chronic neurological disorders associated with persistent neurologic
     st.subheader("Predicted Risk of Sepsis-Associated Delirium Within 7 Days")
     m1, m2 = st.columns([1, 2])
     m1.metric("Predicted probability", f"{probability:.1%}")
-    m2.metric("Risk category", group)
+    with m2:
+        st.markdown(
+            f"""
+<div class="risk-card {risk_css_class(group)}">
+  <div class="risk-card-label">Risk category</div>
+  {group} Risk
+</div>
+            """,
+            unsafe_allow_html=True,
+        )
     st.progress(min(max(probability, 0.0), 1.0))
     st.markdown("---")
     st.markdown(
