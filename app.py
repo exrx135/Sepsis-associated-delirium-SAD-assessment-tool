@@ -110,26 +110,47 @@ section[data-testid="stSidebar"] div {
     background-color: rgba(49, 51, 63, 0.06);
     border-left: 5px solid rgba(49, 51, 63, 0.35);
     border-radius: 8px;
-    padding: 0.75rem 1rem;
-    margin-top: 0.8rem;
-    margin-bottom: 0.8rem;
+    padding: 0.65rem 1rem;
+    margin-top: 0.65rem;
+    margin-bottom: 0.65rem;
 }
 .variable-box .box-title {
-    font-size: 24px;
+    font-size: 23px;
     font-weight: 700;
-    margin-bottom: 0.45rem;
+    margin-bottom: 0.35rem;
+}
+.variable-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 1.5rem;
+    align-items: start;
 }
 .variable-box .var-subtitle {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
-    margin-top: 0.45rem;
-    margin-bottom: 0.2rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.12rem;
 }
 .variable-box p {
-    font-size: 16px;
-    line-height: 1.42;
-    margin-top: 0.15rem;
-    margin-bottom: 0.4rem;
+    font-size: 15.5px;
+    line-height: 1.34;
+    margin-top: 0.08rem;
+    margin-bottom: 0.32rem;
+}
+.interpretation-block {
+    font-size: 17.5px !important;
+    line-height: 1.55 !important;
+    margin-top: 0.4rem;
+}
+.interpretation-title {
+    font-size: 21px !important;
+    font-weight: 750 !important;
+    margin-bottom: 0.35rem;
+}
+@media (max-width: 900px) {
+    .variable-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
     """,
@@ -302,15 +323,20 @@ with tab_single:
         """
 <div class="variable-box">
   <div class="box-title">Variable definitions</div>
+  <div class="variable-grid">
+    <div>
+      <div class="var-subtitle">Mechanical ventilation</div>
+      <p>Use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.</p>
 
-  <div class="var-subtitle">Mechanical ventilation</div>
-  <p>Use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.</p>
+      <div class="var-subtitle">Continuous variables</div>
+      <p>All continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis. Urine output represents the total urine output accumulated during this 24-hour window.</p>
+    </div>
 
-  <div class="var-subtitle">Continuous variables</div>
-  <p>All continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis. Urine output represents the total urine output accumulated during this 24-hour window.</p>
-
-  <div class="var-subtitle">Chronic neurological disease</div>
-  <p>Identified from hospital-level ICD diagnosis records linked to the sepsis ICU stay, including pre-existing comorbidities and diagnoses recorded during the hospital admission. The definition covers chronic neurological disorders associated with persistent neurological dysfunction, such as dementia or other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions; migraine and related headache disorders were excluded.</p>
+    <div>
+      <div class="var-subtitle">Chronic neurological disease</div>
+      <p>Identified from hospital-level ICD diagnosis records linked to the sepsis ICU stay, including pre-existing comorbidities and diagnoses recorded during the hospital admission. The definition covers chronic neurological disorders associated with persistent neurological dysfunction, such as dementia or other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions.</p>
+    </div>
+  </div>
 </div>
         """,
         unsafe_allow_html=True,
@@ -329,11 +355,13 @@ with tab_single:
     st.markdown("---")
     st.markdown(
         f"""
-**Interpretation**  
-According to this prediction model, the estimated probability that this ICU patient with sepsis will develop **sepsis-associated delirium (SAD) within 7 days after sepsis diagnosis** is **{probability:.1%}**.  
-
-Risk category: **{group}**. {group_note} These categories are intended only to make the risk estimate easier to read and should not be interpreted as externally validated clinical decision thresholds.
-        """
+<div class="interpretation-block">
+  <div class="interpretation-title">Interpretation</div>
+  <p>According to this prediction model, the estimated probability that this ICU patient with sepsis will develop <strong>sepsis-associated delirium (SAD) within 7 days after sepsis diagnosis</strong> is <strong>{probability:.1%}</strong>.</p>
+  <p>Risk category: <strong>{group}</strong>. {group_note} These categories are intended only to make the risk estimate easier to read and should not be interpreted as externally validated clinical decision thresholds.</p>
+</div>
+        """,
+        unsafe_allow_html=True,
     )
 
     with st.expander("Individual prediction explanation based on SHAP values", expanded=True):
