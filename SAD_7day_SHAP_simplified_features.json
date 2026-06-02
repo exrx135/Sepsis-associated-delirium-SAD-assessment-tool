@@ -1,0 +1,16 @@
+[
+    "invasive_vent_12h_24h_pre_dx",
+    "chronic_neurological",
+    "avg_po2",
+    "hr_before_sepsis_urineoutput",
+    "avg_mchc",
+    "avg_rdw",
+    "admission_age",
+    "avg_mbp",
+    "avg_ptt",
+    "avg_calcium",
+    "avg_aniongap",
+    "avg_pt",
+    "los_before_icu",
+    "avg_hematocrit"
+]

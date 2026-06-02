@@ -1,0 +1,45 @@
+{
+    "model_type": "CatBoostClassifier",
+    "outcome": "SAD_7days",
+    "best_k": 14,
+    "best_features": [
+        "invasive_vent_12h_24h_pre_dx",
+        "chronic_neurological",
+        "avg_po2",
+        "hr_before_sepsis_urineoutput",
+        "avg_mchc",
+        "avg_rdw",
+        "admission_age",
+        "avg_mbp",
+        "avg_ptt",
+        "avg_calcium",
+        "avg_aniongap",
+        "avg_pt",
+        "los_before_icu",
+        "avg_hematocrit"
+    ],
+    "best_features_display": [
+        "Mechanical ventilation",
+        "Chronic neurological disease",
+        "PaO₂",
+        "Urine output",
+        "MCHC",
+        "RDW",
+        "Age",
+        "Mean arterial pressure",
+        "PTT",
+        "Calcium",
+        "Anion gap",
+        "PT",
+        "Pre-ICU LOS",
+        "Hematocrit"
+    ],
+    "simplified_validation_auc": 0.7479380954638101,
+    "simplified_test_auc": 0.7336199474602088,
+    "full_validation_auc": 0.7464665376809283,
+    "full_test_auc": 0.7307425384666327,
+    "categorical_features": [
+        "invasive_vent_12h_24h_pre_dx",
+        "chronic_neurological"
+    ]
+}
