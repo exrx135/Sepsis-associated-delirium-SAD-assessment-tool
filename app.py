@@ -22,65 +22,114 @@ st.set_page_config(
 st.markdown(
     """
 <style>
-html, body, [class*="css"] {
-    font-size: 21px !important;
-}
-.stApp {
-    font-size: 21px !important;
-}
+/* Page container */
 .block-container {
-    padding-top: 2rem;
+    padding-top: 1.2rem;
     max-width: 1500px;
 }
+
+/* Three-level typography hierarchy */
 h1 {
-    font-size: 4.2rem !important;
+    font-size: 40px !important;
     font-weight: 800 !important;
-    line-height: 1.08 !important;
-    margin-bottom: 0.6rem !important;
+    line-height: 1.12 !important;
+    margin-bottom: 0.45rem !important;
 }
-h2 {
-    font-size: 2.65rem !important;
-    font-weight: 750 !important;
-}
-h3 {
-    font-size: 2.1rem !important;
-    font-weight: 720 !important;
-}
-h4 {
-    font-size: 1.75rem !important;
+
+h2, h3 {
+    font-size: 24px !important;
     font-weight: 700 !important;
+    line-height: 1.25 !important;
+    margin-top: 0.8rem !important;
+    margin-bottom: 0.45rem !important;
 }
-p, li, div, label, span {
-    font-size: 1.12rem !important;
+
+h4 {
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    margin-top: 0.7rem !important;
+    margin-bottom: 0.35rem !important;
+}
+
+/* Main body text */
+p, li {
+    font-size: 16px !important;
     line-height: 1.55 !important;
 }
-.stCaptionContainer, .stCaptionContainer p {
-    font-size: 1.15rem !important;
+
+.stMarkdown, .stText, .stCaptionContainer {
+    font-size: 16px !important;
 }
+
+/* Form widgets */
+[data-testid="stNumberInput"] label,
+[data-testid="stSelectbox"] label {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+}
+
+input, textarea, [data-baseweb="select"] * {
+    font-size: 16px !important;
+}
+
+/* Tabs and buttons */
+button, [data-testid="stTabs"] button p {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+}
+
+/* Metrics */
 [data-testid="stMetricLabel"] {
-    font-size: 1.25rem !important;
+    font-size: 17px !important;
     font-weight: 650 !important;
 }
 [data-testid="stMetricValue"] {
-    font-size: 2.85rem !important;
+    font-size: 34px !important;
     font-weight: 760 !important;
 }
-[data-testid="stNumberInput"] label, [data-testid="stSelectbox"] label {
-    font-size: 1.22rem !important;
-    font-weight: 680 !important;
+
+/* Sidebar */
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    font-size: 17px !important;
 }
-input, textarea, [data-baseweb="select"] * {
-    font-size: 1.12rem !important;
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] li,
+section[data-testid="stSidebar"] div {
+    font-size: 16px !important;
 }
-button, [data-testid="stTabs"] button p {
-    font-size: 1.18rem !important;
-    font-weight: 650 !important;
-}
-section[data-testid="stSidebar"] * {
-    font-size: 1.08rem !important;
-}
+
+/* Dataframe */
 [data-testid="stDataFrame"] * {
-    font-size: 1.05rem !important;
+    font-size: 15px !important;
+}
+
+/* Custom variable-definition box */
+.variable-box {
+    background-color: rgba(49, 51, 63, 0.06);
+    border-left: 5px solid rgba(49, 51, 63, 0.35);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
+}
+.variable-box .box-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+}
+.variable-box .var-subtitle {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 0.45rem;
+    margin-bottom: 0.2rem;
+}
+.variable-box p {
+    font-size: 16px;
+    line-height: 1.42;
+    margin-top: 0.15rem;
+    margin-bottom: 0.4rem;
 }
 </style>
     """,
@@ -249,13 +298,22 @@ with tab_single:
                     step=step,
                 )
 
-    st.info(
+    st.markdown(
         """
-**Variable definitions**  
-• **Mechanical ventilation**: use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.  
-• **Continuous variables**: all continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis; **urine output** represents the total urine output accumulated during this 24-hour window.  
-• **Chronic neurological disease**: identified from hospital-level ICD diagnosis records linked to the sepsis ICU stay, including pre-existing comorbidities and diagnoses recorded during the hospital admission. The definition covers chronic neurological disorders associated with persistent neurological dysfunction, such as dementia or other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions; migraine and related headache disorders were excluded.
-        """
+<div class="variable-box">
+  <div class="box-title">Variable definitions</div>
+
+  <div class="var-subtitle">Mechanical ventilation</div>
+  <p>Use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.</p>
+
+  <div class="var-subtitle">Continuous variables</div>
+  <p>All continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis. Urine output represents the total urine output accumulated during this 24-hour window.</p>
+
+  <div class="var-subtitle">Chronic neurological disease</div>
+  <p>Identified from hospital-level ICD diagnosis records linked to the sepsis ICU stay, including pre-existing comorbidities and diagnoses recorded during the hospital admission. The definition covers chronic neurological disorders associated with persistent neurological dysfunction, such as dementia or other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions; migraine and related headache disorders were excluded.</p>
+</div>
+        """,
+        unsafe_allow_html=True,
     )
 
     input_df = pd.DataFrame([{feature: values[feature] for feature in features}])
@@ -268,6 +326,7 @@ with tab_single:
     m1.metric("Predicted probability", f"{probability:.1%}")
     m2.metric("Risk category", group)
     st.progress(min(max(probability, 0.0), 1.0))
+    st.markdown("---")
     st.markdown(
         f"""
 **Interpretation**  
@@ -303,7 +362,7 @@ Risk category: **{group}**. {group_note} These categories are intended only to m
                     table_df[["Predictor", "Value", "SHAP contribution", "Predicted risk"]],
                     use_container_width=True,
                     hide_index=True,
-                    height=560,
+                    height=520,
                 )
 
             st.caption("Positive SHAP values increase the model-predicted risk; negative SHAP values decrease the model-predicted risk. All 14 predictors are displayed and ordered from the largest to the smallest absolute contribution.")
