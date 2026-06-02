@@ -23,42 +23,64 @@ st.markdown(
     """
 <style>
 html, body, [class*="css"] {
-    font-size: 18px;
+    font-size: 21px !important;
 }
 .stApp {
-    font-size: 18px;
+    font-size: 21px !important;
+}
+.block-container {
+    padding-top: 2rem;
+    max-width: 1500px;
 }
 h1 {
-    font-size: 3.0rem !important;
-    font-weight: 750 !important;
+    font-size: 4.2rem !important;
+    font-weight: 800 !important;
+    line-height: 1.08 !important;
+    margin-bottom: 0.6rem !important;
 }
 h2 {
-    font-size: 2.1rem !important;
+    font-size: 2.65rem !important;
+    font-weight: 750 !important;
 }
 h3 {
-    font-size: 1.65rem !important;
+    font-size: 2.1rem !important;
+    font-weight: 720 !important;
 }
 h4 {
-    font-size: 1.35rem !important;
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
 }
 p, li, div, label, span {
-    font-size: 1.04rem;
+    font-size: 1.12rem !important;
+    line-height: 1.55 !important;
 }
 .stCaptionContainer, .stCaptionContainer p {
-    font-size: 1.02rem !important;
+    font-size: 1.15rem !important;
 }
 [data-testid="stMetricLabel"] {
-    font-size: 1.08rem !important;
+    font-size: 1.25rem !important;
+    font-weight: 650 !important;
 }
 [data-testid="stMetricValue"] {
-    font-size: 2.15rem !important;
+    font-size: 2.85rem !important;
+    font-weight: 760 !important;
 }
 [data-testid="stNumberInput"] label, [data-testid="stSelectbox"] label {
-    font-size: 1.08rem !important;
-    font-weight: 600 !important;
+    font-size: 1.22rem !important;
+    font-weight: 680 !important;
+}
+input, textarea, [data-baseweb="select"] * {
+    font-size: 1.12rem !important;
+}
+button, [data-testid="stTabs"] button p {
+    font-size: 1.18rem !important;
+    font-weight: 650 !important;
 }
 section[data-testid="stSidebar"] * {
-    font-size: 1.0rem;
+    font-size: 1.08rem !important;
+}
+[data-testid="stDataFrame"] * {
+    font-size: 1.05rem !important;
 }
 </style>
     """,
@@ -258,20 +280,22 @@ Risk category: **{group}**. {group_note} These categories are intended only to m
     with st.expander("Individual prediction explanation based on SHAP values", expanded=True):
         try:
             shap_df = get_local_shap(input_df)
-            top_df = shap_df.head(10).copy()
-            plot_df = top_df.sort_values("SHAP contribution", ascending=True)
-            table_df = plot_df.iloc[::-1].copy()
+            plot_df = shap_df.copy()  # show all 14 predictors
+            table_df = plot_df.copy()
             table_df["SHAP contribution"] = table_df["SHAP contribution"].map(lambda x: f"{x:.4f}")
 
-            fig_col, table_col = st.columns([1.15, 1.0], gap="large")
+            fig_col, table_col = st.columns([1.05, 1.05], gap="large")
             with fig_col:
-                fig_height = max(4.8, 0.45 * len(plot_df))
-                fig, ax = plt.subplots(figsize=(7.2, fig_height))
-                ax.barh(plot_df["Predictor"], plot_df["SHAP contribution"] .astype(float))
+                fig_height = max(7.2, 0.46 * len(plot_df))
+                fig, ax = plt.subplots(figsize=(7.4, fig_height))
+                ax.barh(plot_df["Predictor"], plot_df["SHAP contribution"].astype(float))
                 ax.axvline(0, linewidth=1)
-                ax.set_xlabel("SHAP contribution to model output")
+                ax.invert_yaxis()
+                ax.set_xlabel("SHAP contribution to model output", fontsize=13)
                 ax.set_ylabel("")
-                ax.set_title("Top feature contributions")
+                ax.set_title("Feature contributions", fontsize=16, fontweight="bold")
+                ax.tick_params(axis="both", labelsize=12)
+                fig.tight_layout()
                 st.pyplot(fig, use_container_width=True)
 
             with table_col:
@@ -279,9 +303,10 @@ Risk category: **{group}**. {group_note} These categories are intended only to m
                     table_df[["Predictor", "Value", "SHAP contribution", "Predicted risk"]],
                     use_container_width=True,
                     hide_index=True,
+                    height=560,
                 )
 
-            st.caption("Positive SHAP values increase the model-predicted risk; negative SHAP values decrease the model-predicted risk. The figure and table use the same order from top to bottom.")
+            st.caption("Positive SHAP values increase the model-predicted risk; negative SHAP values decrease the model-predicted risk. All 14 predictors are displayed and ordered from the largest to the smallest absolute contribution.")
         except Exception as exc:
             st.warning(f"SHAP explanation could not be generated for this input: {exc}")
 

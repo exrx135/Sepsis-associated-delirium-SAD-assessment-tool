@@ -1,6 +1,12 @@
 # Sepsis Associated Delirium (SAD) Assessment Tool
 
-This repository contains a Streamlit-based online calculator for estimating the risk of **sepsis-associated delirium (SAD) within 7 days after sepsis diagnosis** among adult ICU patients.
+This repository contains a Streamlit-based online calculator (v5 UI revision) for estimating the risk of **sepsis-associated delirium (SAD) within 7 days after sepsis diagnosis** among adult ICU patients.
+
+## Version notes
+
+- Larger global font size and enlarged main title for better full-screen readability.
+- Continuous predictors are displayed in four columns.
+- Individual SHAP explanation displays all 14 predictors, ordered by absolute contribution, with the figure and table aligned in the same order.
 
 ## Important note
 
@@ -54,7 +60,7 @@ streamlit run app.py
 ### Option 1: Upload through the GitHub web page
 
 1. Create a new GitHub repository.
-2. Unzip `SAD_7day_Streamlit_app_v4.zip` on your computer.
+2. Unzip `SAD_7day_Streamlit_app_v5.zip` on your computer.
 3. Open the new GitHub repository page.
 4. Click **Add file** → **Upload files**.
 5. Drag all unzipped files into the upload area, including:
