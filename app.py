@@ -132,6 +132,21 @@ section[data-testid="stSidebar"] div {
     margin-bottom: 0.4rem;
 }
 
+/* Compact horizontal input rows */
+.inline-input-label {
+    font-size: 16px !important;
+    font-weight: 650 !important;
+    line-height: 1.2 !important;
+    padding-top: 0.45rem !important;
+    margin-bottom: 0 !important;
+}
+
+/* Reduce excess vertical spacing around compact inputs */
+div[data-testid="stNumberInput"],
+div[data-testid="stSelectbox"] {
+    margin-bottom: 0.15rem !important;
+}
+
 /* Slightly emphasized interpretation section */
 .interpretation-title {
     font-size: 19px !important;
@@ -205,6 +220,47 @@ INPUT_CONFIG = {
 
 def feature_label(feature: str) -> str:
     return DISPLAY_NAMES.get(feature, feature)
+
+
+def compact_selectbox(feature: str, key: str):
+    """Render a compact horizontal label-selectbox pair."""
+    label_col, input_col = st.columns([1.25, 1.0], gap="small")
+    with label_col:
+        st.markdown(
+            f'<div class="inline-input-label">{feature_label(feature)}</div>',
+            unsafe_allow_html=True,
+        )
+    with input_col:
+        return st.selectbox(
+            label=feature_label(feature),
+            options=[0, 1],
+            format_func=lambda x: "Yes / 1" if x == 1 else "No / 0",
+            index=int(DEFAULTS[feature]),
+            label_visibility="collapsed",
+            key=key,
+        )
+
+
+def compact_number_input(feature: str, key: str):
+    """Render a compact horizontal label-number_input pair."""
+    min_value, max_value, step, unit = INPUT_CONFIG.get(feature, (0.0, 9999.0, 0.1, ""))
+    label = feature_label(feature) if not unit else f"{feature_label(feature)} [{unit}]"
+    label_col, input_col = st.columns([1.35, 1.0], gap="small")
+    with label_col:
+        st.markdown(
+            f'<div class="inline-input-label">{label}</div>',
+            unsafe_allow_html=True,
+        )
+    with input_col:
+        return st.number_input(
+            label=label,
+            min_value=min_value,
+            max_value=max_value,
+            value=float(DEFAULTS.get(feature, min_value)),
+            step=step,
+            label_visibility="collapsed",
+            key=key,
+        )
 
 
 def prepare_input(input_df: pd.DataFrame) -> pd.DataFrame:
@@ -287,28 +343,15 @@ with tab_single:
     binary_cols = st.columns(2)
     for idx, feature in enumerate(categorical_features):
         with binary_cols[idx % 2]:
-            values[feature] = st.selectbox(
-                feature_label(feature),
-                options=[0, 1],
-                format_func=lambda x: "Yes / 1" if x == 1 else "No / 0",
-                index=int(DEFAULTS[feature]),
-            )
+            values[feature] = compact_selectbox(feature, key=f"binary_{feature}")
 
     st.markdown("#### Continuous predictors")
     numeric_features = [f for f in features if f not in categorical_features]
     for row_start in range(0, len(numeric_features), 4):
         cols = st.columns(4)
         for col, feature in zip(cols, numeric_features[row_start:row_start + 4]):
-            min_value, max_value, step, unit = INPUT_CONFIG.get(feature, (0.0, 9999.0, 0.1, ""))
-            label = feature_label(feature) if not unit else f"{feature_label(feature)} [{unit}]"
             with col:
-                values[feature] = st.number_input(
-                    label,
-                    min_value=min_value,
-                    max_value=max_value,
-                    value=float(DEFAULTS.get(feature, min_value)),
-                    step=step,
-                )
+                values[feature] = compact_number_input(feature, key=f"num_{feature}")
 
     with st.container(border=True):
         st.markdown("#### Variable definitions")

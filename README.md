@@ -42,3 +42,8 @@ Use the following settings:
 - Main file path: `app.py`
 
 After each GitHub commit, Streamlit Cloud usually redeploys the app automatically.
+
+
+## Version note
+
+This version uses compact horizontal input rows to reduce page height while preserving the prediction logic and SHAP explanation workflow.
