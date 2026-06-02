@@ -14,9 +14,55 @@ CATEGORICAL_PATH = APP_DIR / "SAD_7day_SHAP_simplified_categorical_features.json
 MODEL_INFO_PATH = APP_DIR / "SAD_7day_SHAP_simplified_model_info.json"
 
 st.set_page_config(
-    page_title="SA-D Risk Assessment Tool",
+    page_title="SAD Assessment Tool",
     page_icon="🧠",
     layout="wide",
+)
+
+st.markdown(
+    """
+<style>
+html, body, [class*="css"] {
+    font-size: 18px;
+}
+.stApp {
+    font-size: 18px;
+}
+h1 {
+    font-size: 3.0rem !important;
+    font-weight: 750 !important;
+}
+h2 {
+    font-size: 2.1rem !important;
+}
+h3 {
+    font-size: 1.65rem !important;
+}
+h4 {
+    font-size: 1.35rem !important;
+}
+p, li, div, label, span {
+    font-size: 1.04rem;
+}
+.stCaptionContainer, .stCaptionContainer p {
+    font-size: 1.02rem !important;
+}
+[data-testid="stMetricLabel"] {
+    font-size: 1.08rem !important;
+}
+[data-testid="stMetricValue"] {
+    font-size: 2.15rem !important;
+}
+[data-testid="stNumberInput"] label, [data-testid="stSelectbox"] label {
+    font-size: 1.08rem !important;
+    font-weight: 600 !important;
+}
+section[data-testid="stSidebar"] * {
+    font-size: 1.0rem;
+}
+</style>
+    """,
+    unsafe_allow_html=True,
 )
 
 
@@ -120,7 +166,7 @@ def get_local_shap(input_df: pd.DataFrame) -> pd.DataFrame:
     return df.sort_values("Absolute contribution", ascending=False)
 
 
-st.title("SA-D Risk Assessment Tool")
+st.title("Sepsis Associated Delirium (SAD) Assessment Tool")
 st.caption("Predicting the risk of sepsis-associated delirium (SAD) within 7 days after sepsis diagnosis.")
 
 with st.expander("About this tool", expanded=False):
@@ -167,9 +213,9 @@ with tab_single:
 
     st.markdown("#### Continuous predictors")
     numeric_features = [f for f in features if f not in categorical_features]
-    for row_start in range(0, len(numeric_features), 3):
-        cols = st.columns(3)
-        for col, feature in zip(cols, numeric_features[row_start:row_start + 3]):
+    for row_start in range(0, len(numeric_features), 4):
+        cols = st.columns(4)
+        for col, feature in zip(cols, numeric_features[row_start:row_start + 4]):
             min_value, max_value, step, unit = INPUT_CONFIG.get(feature, (0.0, 9999.0, 0.1, ""))
             label = feature_label(feature) if not unit else f"{feature_label(feature)} [{unit}]"
             with col:
@@ -213,25 +259,31 @@ Risk category: **{group}**. {group_note} These categories are intended only to m
         try:
             shap_df = get_local_shap(input_df)
             top_df = shap_df.head(10).copy()
-            fig, ax = plt.subplots(figsize=(8, 4.8))
-            plot_df = top_df.sort_values("SHAP contribution")
-            ax.barh(plot_df["Predictor"], plot_df["SHAP contribution"])
-            ax.axvline(0, linewidth=1)
-            ax.set_xlabel("SHAP contribution to model output")
-            ax.set_ylabel("")
-            ax.set_title("Top feature contributions for this prediction")
-            st.pyplot(fig, use_container_width=True)
-            st.caption("Positive SHAP values increase the model-predicted risk; negative SHAP values decrease the model-predicted risk.")
-            st.dataframe(
-                shap_df[["Predictor", "Value", "SHAP contribution", "Predicted risk"]],
-                use_container_width=True,
-            )
+            plot_df = top_df.sort_values("SHAP contribution", ascending=True)
+            table_df = plot_df.iloc[::-1].copy()
+            table_df["SHAP contribution"] = table_df["SHAP contribution"].map(lambda x: f"{x:.4f}")
+
+            fig_col, table_col = st.columns([1.15, 1.0], gap="large")
+            with fig_col:
+                fig_height = max(4.8, 0.45 * len(plot_df))
+                fig, ax = plt.subplots(figsize=(7.2, fig_height))
+                ax.barh(plot_df["Predictor"], plot_df["SHAP contribution"] .astype(float))
+                ax.axvline(0, linewidth=1)
+                ax.set_xlabel("SHAP contribution to model output")
+                ax.set_ylabel("")
+                ax.set_title("Top feature contributions")
+                st.pyplot(fig, use_container_width=True)
+
+            with table_col:
+                st.dataframe(
+                    table_df[["Predictor", "Value", "SHAP contribution", "Predicted risk"]],
+                    use_container_width=True,
+                    hide_index=True,
+                )
+
+            st.caption("Positive SHAP values increase the model-predicted risk; negative SHAP values decrease the model-predicted risk. The figure and table use the same order from top to bottom.")
         except Exception as exc:
             st.warning(f"SHAP explanation could not be generated for this input: {exc}")
-
-    with st.expander("Show model input table"):
-        display_df = input_df.rename(columns={f: DISPLAY_NAMES.get(f, f) for f in input_df.columns})
-        st.dataframe(display_df, use_container_width=True)
 
 with tab_batch:
     st.subheader("Batch CSV prediction")
