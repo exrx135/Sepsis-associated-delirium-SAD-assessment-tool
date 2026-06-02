@@ -110,47 +110,38 @@ section[data-testid="stSidebar"] div {
     background-color: rgba(49, 51, 63, 0.06);
     border-left: 5px solid rgba(49, 51, 63, 0.35);
     border-radius: 8px;
-    padding: 0.65rem 1rem;
-    margin-top: 0.65rem;
-    margin-bottom: 0.65rem;
+    padding: 0.75rem 1rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
 }
 .variable-box .box-title {
-    font-size: 23px;
+    font-size: 24px;
     font-weight: 700;
-    margin-bottom: 0.35rem;
-}
-.variable-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem 1.5rem;
-    align-items: start;
+    margin-bottom: 0.45rem;
 }
 .variable-box .var-subtitle {
-    font-size: 19px;
+    font-size: 20px;
     font-weight: 700;
-    margin-top: 0.25rem;
-    margin-bottom: 0.12rem;
+    margin-top: 0.45rem;
+    margin-bottom: 0.2rem;
 }
 .variable-box p {
-    font-size: 15.5px;
-    line-height: 1.34;
-    margin-top: 0.08rem;
-    margin-bottom: 0.32rem;
+    font-size: 16px;
+    line-height: 1.42;
+    margin-top: 0.15rem;
+    margin-bottom: 0.4rem;
 }
-.interpretation-block {
-    font-size: 17.5px !important;
-    line-height: 1.55 !important;
-    margin-top: 0.4rem;
-}
+
+/* Slightly emphasized interpretation section */
 .interpretation-title {
-    font-size: 21px !important;
+    font-size: 19px !important;
     font-weight: 750 !important;
-    margin-bottom: 0.35rem;
+    margin-top: 0.35rem !important;
+    margin-bottom: 0.35rem !important;
 }
-@media (max-width: 900px) {
-    .variable-grid {
-        grid-template-columns: 1fr;
-    }
+.interpretation-body {
+    font-size: 17px !important;
+    line-height: 1.55 !important;
 }
 </style>
     """,
@@ -319,28 +310,28 @@ with tab_single:
                     step=step,
                 )
 
-    st.markdown(
-        """
-<div class="variable-box">
-  <div class="box-title">Variable definitions</div>
-  <div class="variable-grid">
-    <div>
-      <div class="var-subtitle">Mechanical ventilation</div>
-      <p>Use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.</p>
+    with st.container(border=True):
+        st.markdown("#### Variable definitions")
+        def_col1, def_col2 = st.columns(2, gap="large")
 
-      <div class="var-subtitle">Continuous variables</div>
-      <p>All continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis. Urine output represents the total urine output accumulated during this 24-hour window.</p>
-    </div>
+        with def_col1:
+            st.markdown(
+                """
+**Mechanical ventilation**  
+Use of invasive mechanical ventilation during the period from 12 to 24 hours before sepsis diagnosis.
 
-    <div>
-      <div class="var-subtitle">Chronic neurological disease</div>
-      <p>Identified from hospital-level ICD diagnosis records linked to the sepsis ICU stay, including pre-existing comorbidities and diagnoses recorded during the hospital admission. The definition covers chronic neurological disorders associated with persistent neurological dysfunction, such as dementia or other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions.</p>
-    </div>
-  </div>
-</div>
-        """,
-        unsafe_allow_html=True,
-    )
+**Continuous variables**  
+All continuous predictors except urine output represent mean values measured during the 24 hours preceding sepsis diagnosis. Urine output represents the total urine output accumulated during this 24-hour window.
+                """
+            )
+
+        with def_col2:
+            st.markdown(
+                """
+**Chronic neurological disease**  
+Presence of chronic neurological disorders associated with persistent neurological dysfunction, including dementia and other neurodegenerative diseases, Parkinsonian and other movement disorders, epilepsy, demyelinating diseases, chronic spinal cord diseases, chronic paralysis, and related long-term neurological conditions.
+                """
+            )
 
     input_df = pd.DataFrame([{feature: values[feature] for feature in features}])
     probability = float(make_prediction(input_df)["predicted_probability"].iloc[0])
@@ -355,10 +346,10 @@ with tab_single:
     st.markdown("---")
     st.markdown(
         f"""
-<div class="interpretation-block">
-  <div class="interpretation-title">Interpretation</div>
-  <p>According to this prediction model, the estimated probability that this ICU patient with sepsis will develop <strong>sepsis-associated delirium (SAD) within 7 days after sepsis diagnosis</strong> is <strong>{probability:.1%}</strong>.</p>
-  <p>Risk category: <strong>{group}</strong>. {group_note} These categories are intended only to make the risk estimate easier to read and should not be interpreted as externally validated clinical decision thresholds.</p>
+<div class="interpretation-title">Interpretation</div>
+<div class="interpretation-body">
+According to this prediction model, the estimated probability that this ICU patient with sepsis will develop <strong>sepsis-associated delirium (SAD) within 7 days after sepsis diagnosis</strong> is <strong>{probability:.1%}</strong>.<br><br>
+Risk category: <strong>{group}</strong>. {group_note} These categories are intended only to make the risk estimate easier to read and should not be interpreted as externally validated clinical decision thresholds.
 </div>
         """,
         unsafe_allow_html=True,
