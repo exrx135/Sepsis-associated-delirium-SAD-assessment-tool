@@ -7,7 +7,8 @@ import pandas as pd
 import streamlit as st
 from catboost import Pool
 
-APP_DIR = Path(__file__).resolve().parent
+import os
+APP_DIR = Path(os.environ.get("SAD_APP_ASSET_DIR", str(Path(__file__).resolve().parent.parent / "study_code_and_data" / "final_analysis" / "deployment_assets")))
 MODEL_PATH = APP_DIR / "SAD_7day_SHAP_simplified_CatBoost_model.pkl"
 FEATURES_PATH = APP_DIR / "SAD_7day_SHAP_simplified_features.json"
 CATEGORICAL_PATH = APP_DIR / "SAD_7day_SHAP_simplified_categorical_features.json"
@@ -225,6 +226,11 @@ def load_metadata():
     return features, categorical_features, model_info
 
 
+required_assets = [MODEL_PATH, FEATURES_PATH, CATEGORICAL_PATH, MODEL_INFO_PATH]
+missing_assets = [p.name for p in required_assets if not p.is_file()]
+if missing_assets:
+    st.info("Provide the local trained model and metadata through SAD_APP_ASSET_DIR. See README.md. Missing: " + ", ".join(missing_assets))
+    st.stop()
 model = load_model()
 features, categorical_features, model_info = load_metadata()
 DISPLAY_NAMES = dict(zip(model_info.get("best_features", []), model_info.get("best_features_display", [])))
@@ -549,3 +555,4 @@ with tab_model:
 
     st.markdown("#### Expected CSV columns")
     st.code("\n".join(features))
+
