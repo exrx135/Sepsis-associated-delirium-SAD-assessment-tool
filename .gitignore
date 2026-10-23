@@ -1,0 +1,20 @@
+# Source-only release: ignore every unlisted artifact type by default.
+*
+!*/
+!*.py
+!*.R
+!*.do
+!*.sql
+!*.md
+!requirements.txt
+!.gitignore
+__pycache__/
+.ipynb_checkpoints/
+.env*
+secrets.*
+private_inputs/
+private_outputs/
+study_code_and_data/
+data/
+models/
+outputs/
